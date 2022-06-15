@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <title>Matrix Output</title>
+    <style>
+        body{
+            width: auto; 
+            height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            overflow: hidden;
+            background-color: black;
+        }
+        #MatrixTable{
+            display: flex; 
+            flex-direction: row;
+            width: auto;
+        }
+        #matrixArray{
+            position: relative;
+            display: flex; 
+            flex-direction: row;
+            width: 64vw;
+            height: 18cm;
+            overflow-y: hidden;
+            overflow-x: scroll;
+            margin: 0px 20px;
+            padding: 1cm;
+            vertical-align: middle;
+        }
+        #output{
+            position: relative;
+            width: 30vw;
+        }
+        .matrix{
+            position: relative;
+            margin: 0px auto;
+            font-family: Arial, Helvetica, sans-serif ;
+            font-size: x-small; 
+            /* 
+            border: 2px solid black; 
+            width: calc(16cm + 4px); 
+            height: calc(16cm + 4px); 
+            */
+            width: 16cm;
+            height: 16cm;
+            display: grid; 
+            grid-template-rows: auto auto auto auto auto auto auto auto auto auto auto auto auto auto auto auto;
+        }
+        .row{
+            width: 16cm; 
+            height: 1cm; 
+            display: grid; 
+            grid-template-columns: auto auto auto auto auto auto auto auto auto auto auto auto auto auto auto auto; 
+            align-items: center;
+        }
+        #matrix0 .row::before{
+            content: attr(index);
+            position: absolute;
+            width: 1cm;
+            height: 1cm;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: translateX(-1cm);
+            font-size: medium;
+            font-weight: bold;
+            color: white;
+        }
+        .col{
+            background-color: gray; 
+            border: 1px solid black; 
+            border-radius: 50%; 
+            width: 6mm; 
+            height: 6mm; 
+            padding: 0px; 
+            margin: 0px auto; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            user-select: none;
+            cursor: pointer;
+        }
+        #row0 .col::before{
+            content: attr(index);
+            position: absolute;
+            width: 1cm;
+            height: 1cm;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: translateY(-1cm);
+            font-size: medium;
+            font-weight: bold;
+            color: white;
+        }
+        #outputMatrix{
+            margin-top: 0px; 
+            padding: 20px; 
+            width: 500px; 
+            height: 10cm; 
+            border: 2px solid white; 
+            overflow-y: scroll; 
+            word-wrap: break-word;
+            color: white;
+            background-color: gray;
+        } 
+        #outputMatrix span{
+            margin: 0px; 
+            padding: 4px; 
+            font-family: monospace;
+        }
+        #buttonMatrix{
+            display: flex; 
+            flex-direction: row;
+            justify-content: center;
+            width: 544px;
+        }
+        #buttonMatrix button{
+            position: relative;
+            width: 90px;
+            height: 50px;
+            margin: 20px 10px;
+            font-size: medium;
+            font-weight: bold;
+            padding: 0px;
+            cursor: pointer;
+            border: 2px solid white;
+            border-radius: 9px;
+        }
+        #buttonMatrix button:hover{
+            background-color: darkcyan !important;
+            color: white;
+        }
+        #outputMatrix::-webkit-scrollbar, #matrixArray::-webkit-scrollbar{ 
+            width: 0 !important;
+            display: none; 
+        }
+        #accessories{
+            position: relative;
+            width: 400px;
+            height: 200px;
+            background-color: white;
+            padding: 20px;
+            margin: 50px;
+            border: 2px solid gray;
+            display: flex;
+            flex-direction: column;
+        }
+        #accessories .accessory{
+            height: 39px;
+            font-size: medium;
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            border-bottom: 1px solid gray;
+        }
+        #accessories .accessory label{
+            position: relative;
+            width: 64px;
+            margin-right: 20px;
+            text-align: end;
+        }
+    </style>
+</head>
+<body>
+    <div id="MatrixTable">
+        <div id="matrixArray">
+        </div>
+        <div id="output">
+            <div id="outputMatrix">
+            </div>
+            <div id="buttonMatrix">
+                <button onclick="add()" style="background-color: chartreuse;">Add</button>
+                <button onclick="remove()" style="background-color: orangered;">Remove</button>
+                <button onclick="generate()" style="background-color: chartreuse;">Generate</button>
+                <button onclick="resetMatrix()" style="background-color: orangered;">Reset</button>
+            </div>
+            <div id="accessories">
+                <div class="accessory">
+                    <label>Fill: </label>
+                    <input type="checkbox" id="fill" style="width: 15px; height: 15px; margin: 0px;">
+                </div>
+                <div class="accessory">
+                    <label>Color: </label>
+                    <input id="colorPicker" type="color" value="#ffff00"><br>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    matrixCounter = 0;
+    flagGenerate = 0;
+    function add(){
+        flagGenerate = 0;
+        $("#matrixArray").append(`<table class="matrix" id="matrix${matrixCounter}"></table>`);
+        console.log("Add matrix");
+        for (i=0; i<=15; i++){
+            $("#matrix"+matrixCounter).append(`<tr id='row${i}' class='row'></tr>`);
+            for (j=matrixCounter*16; j<(matrixCounter+1)*16; j++){
+                $("#matrix"+matrixCounter+" #row"+i).append(`<td id='col${j}' class='col' onclick="onMouseOverElement(${i},${j})"></td>`);
+                $("#matrix"+matrixCounter+" #row0 #col"+j).attr('index', j);
+            }
+            $("#matrix0"+" #row"+i).attr('index',i);
+        }
+        for (i=0; i<=15; i++){
+            for (j=0; j<(matrixCounter+1)*16; j++){
+                $(" #row"+i+" #col"+j).text(`${(matrixCounter+1)*16*i+j}`);
+            }
+        }
+        if(matrixCounter) $(".matrix").css({"margin":"0px"});
+        matrixCounter+=1;
+    }
+    function remove(){
+        flagGenerate = 0;
+        option = confirm("Are you sure to remove the last matrix?");
+        if (!option) return;
+        matrixCounter-=1;
+        //console.log(matrixCounter);
+        if(!(matrixCounter-1)) $(".matrix").css({"margin":"0px auto"});
+        $("#matrix"+matrixCounter).remove();
+        //console.log("Remove matrix");
+        for (i=0; i<=15; i++){
+            for (j=0; j<matrixCounter*16; j++){
+                $(" #row"+i+" #col"+j).text(`${matrixCounter*16*i+j}`);
+            }
+        }
+    }
+    function ColorToHex(color) {
+        var hexadecimal = color.toString(16);
+        return hexadecimal.length == 1 ? "0" + hexadecimal : hexadecimal;
+    }
+    function ConvertRGBtoHex(red, green, blue) {
+        return "#" + ColorToHex(red) + ColorToHex(green) + ColorToHex(blue);
+    }
+    //console.log(ConvertRGBtoHex(255, 255, 255));
+    
+    fill = 0;
+    down = false;
+    flag = [];
+    function CopyToClipboard(){
+        var r = document.createRange();
+        r.selectNode(document.getElementById("outputMatrix"));
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(r);
+        document.execCommand('copy');
+        window.getSelection().removeAllRanges();
+    }
+    $("#fill").change(function(){
+        if ($("#fill").is(":checked")) fill=1;
+        else fill=0;
+    });
+    function onMouseOverElement(i,j){
+        flagGenerate = 0;
+        if ($("#row"+i+" #col"+j).css("background-color")!="rgb(128, 128, 128)" && !fill){
+            $("#row"+i+" #col"+j).css({"background-color":"gray","border-color":"gray","box-shadow":"none"});
+            //console.log("Deselect");
+        }else{
+            $("#row"+i+" #col"+j).css({"background-color":$("#colorPicker").val(),"border-color":$("#colorPicker").val(),"box-shadow":"0px 0px 16px "+$("#colorPicker").val()});
+            //console.log($("#row"+i+" #col"+j).css("background-color"));
+        }
+    }
+    $(window).bind({
+        mousedown : function(){
+            down = true;
+        },
+        mousemove : function(){
+            if(!down) return;
+            flagGenerate = 0;
+            x = event.clientX;
+            y = event.clientY;
+            for (i=0; i<=15; i++)
+                for (j=0; j<matrixCounter*16; j++){
+                    coords = $("#row"+i+" #col"+j);
+                    if (coords.offset().left<=x && x<=coords.offset().left+coords.width() && coords.offset().top<=y && y<=coords.offset().top+coords.height()){
+                        if (flag[matrixCounter*16*i+j]===0){
+                            flag[matrixCounter*16*i+j]=1;
+                            //console.log("arr["+i+"]["+j+"] - " + $("#row"+i+" #col"+j).offset().left);
+                            //$("#row"+i+" #col"+j).css({"background-color":$("#colorPicker").val()});
+                            onMouseOverElement(i,j);
+                        }
+                        }else{
+                            flag[matrixCounter*16*i+j] = 0;
+                        }
+                }
+            //$("#outputMatrix").text("X coords: " + x + ", Y coords: " + y)
+        },
+        mouseup : function(){
+            down = false;
+        }
+    })
+    function resetMatrix(){
+        option = confirm("Are you sure to reset the matrix?");
+        if (!option) return;
+        flagGenerate = 0;
+        $("#outputMatrix").text("");
+        for (i=0; i<=15; i++)
+            for (j=0; j<matrixCounter*16; j++){
+                $("#row"+i+" #col"+j).css({"background-color":"gray","border-color":"gray","box-shadow":"none"});
+                //console.log($("#row"+i+" #col"+j).offset().top + " - " + $("#row"+i+" #col"+j).offset().left + " - " + $("#row"+i+" #col"+j).width() + "px - " + $("#row"+i+" #col"+j).height() + "px - " + typeof($("#row"+i+" #col"+j).offset().top));
+            }
+    }
+    function generate(){
+        flagGenerate += 1;
+        if (flagGenerate == 1){
+            $("#outputMatrix").text("");
+            for (i=0; i<=15; i++)
+                for (j=0; j<matrixCounter*16; j++){
+                    if ($("#row"+i+" #col"+j).css("background-color")!="rgb(128, 128, 128)"){
+                        rgb_component = $("#row"+i+" #col"+j).css("background-color").match(/\d+/g);
+                        rgb = "table["+i+"]["+j+"]=0x" + ConvertRGBtoHex(parseInt(rgb_component[0]), parseInt(rgb_component[1]), parseInt(rgb_component[2])).substr(1) + ";";
+                        $("#outputMatrix").append(`<span>${rgb}</span><br>`)
+                        //console.log(rgb);
+                    }
+                }
+            CopyToClipboard();
+            /*
+            setTimeout(function(){
+                alert("Generated and Copied to clipboard!");
+            }, 0);
+            */
+        }else if (flagGenerate == 2){
+            $("#outputMatrix").text("");
+            obj = prompt("Enter object name:");
+            for (i=0; i<=15; i++)
+                for (j=0; j<matrixCounter*16; j++){
+                    if ($("#row"+i+" #col"+j).css("background-color")!="rgb(128, 128, 128)"){
+                        rgb_component = $("#row"+i+" #col"+j).css("background-color").match(/\d+/g);
+                        rgb = obj+".setColor("+i+","+j+",0x" + ConvertRGBtoHex(parseInt(rgb_component[0]), parseInt(rgb_component[1]), parseInt(rgb_component[2])).substr(1) + ");";
+                        $("#outputMatrix").append(`<span>${rgb}</span><br>`)
+                        //console.log(flagGenerate);
+                    }
+                }
+            CopyToClipboard();
+            flagGenerate = 0;
+        }
+    }
+</script>
+</html>
